@@ -43,6 +43,7 @@ class _LoginState extends State<Login> {
                   ),
                 ),
                 TextField(
+                  obscureText: true,
                   keyboardType: TextInputType.text,
                   style: TextStyle(fontSize: 20),
                   decoration: InputDecoration(
@@ -70,7 +71,7 @@ class _LoginState extends State<Login> {
                   child: GestureDetector(
                     child: Text(
                       "Não tem conta? cadastre-se!",
-                      style: TextStyle(color: Colors.white),
+                      style: TextStyle(color: Colors.white, fontSize: 20),
                     ),
                     onTap: () {
                       Navigator.push(context,
