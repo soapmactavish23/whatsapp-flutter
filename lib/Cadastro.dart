@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'Home.dart';
 import 'model/Usuario.dart';
 
@@ -56,15 +56,15 @@ class _CadastroState extends State<Cadastro> {
     auth
         .createUserWithEmailAndPassword(
             email: usuario.email, password: usuario.senha)
-        .then((firebaseUser) => {
+        .then((firebaseUser) {
+      //Salvar dados do usuario
+      FirebaseFirestore.instance
+          .collection("usuarios")
+          .doc(firebaseUser.user.uid)
+          .set(usuario.toMap());
 
-              Navigator.push(
-        context,
-      MaterialPageRoute(builder: (context) => Home())
-    )
-
-            })
-        .catchError((error) {
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Home()));
+    }).catchError((error) {
       print("erro: ${error.toString()}");
       _mensagemErro =
           "Erro ao cadastrar usuário, verifique os campos e tente novamente!";
