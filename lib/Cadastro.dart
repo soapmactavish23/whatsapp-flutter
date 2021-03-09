@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
+import 'Home.dart';
+import 'model/Usuario.dart';
 
 class Cadastro extends StatefulWidget {
   @override
@@ -19,17 +23,20 @@ class _CadastroState extends State<Cadastro> {
 
     if (nome.isNotEmpty) {
       if (email.isNotEmpty && email.contains("@")) {
-        if (senha.isNotEmpty) {
-
+        if (senha.isNotEmpty && senha.length >= 6) {
           setState(() {
             _mensagemErro = "";
           });
 
-          _cadastrarUsuario();
+          Usuario usuario = Usuario();
+          usuario.nome = nome;
+          usuario.email = email;
+          usuario.senha = senha;
 
+          _cadastrarUsuario(usuario);
         } else {
           setState(() {
-            _mensagemErro = "Preencha a Senha";
+            _mensagemErro = "Preencha a senha! digite mais de 6 caracteres";
           });
         }
       } else {
@@ -44,8 +51,24 @@ class _CadastroState extends State<Cadastro> {
     }
   }
 
-  _cadastrarUsuario(){
+  _cadastrarUsuario(Usuario usuario) {
+    FirebaseAuth auth = FirebaseAuth.instance;
+    auth
+        .createUserWithEmailAndPassword(
+            email: usuario.email, password: usuario.senha)
+        .then((firebaseUser) => {
 
+              Navigator.push(
+        context,
+      MaterialPageRoute(builder: (context) => Home())
+    )
+
+            })
+        .catchError((error) {
+      print("erro: ${error.toString()}");
+      _mensagemErro =
+          "Erro ao cadastrar usuário, verifique os campos e tente novamente!";
+    });
   }
 
   @override

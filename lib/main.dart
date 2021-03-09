@@ -6,10 +6,10 @@ import 'Home.dart';
 
 void main() async{
 
-  /*WidgetsFlutterBinding.ensureInitialized();
+  WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
 
-  FirebaseFirestore.instance.collection("usuario").doc("002").set({"nome":"Amanda"});*/
+  /*FirebaseFirestore.instance.collection("usuario").doc("002").set({"nome":"Amanda"});*/
 
   runApp(MaterialApp(
     home: Login(),
