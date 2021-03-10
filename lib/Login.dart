@@ -46,13 +46,13 @@ class _LoginState extends State<Login> {
         .signInWithEmailAndPassword(
             email: usuario.email, password: usuario.senha)
         .then((firebaseUser) => {
-              Navigator.pushReplacement(
-                  context, MaterialPageRoute(builder: (context) => Home()))
+              Navigator.pushReplacementNamed(context, "/home")
             })
         .catchError((error) {
       print("error: ${error.toString()}");
       setState(() {
-        _mensagemErro = "Erro ao logar usuário, verifique os campos e tente novamente!";
+        _mensagemErro =
+            "Erro ao logar usuário, verifique os campos e tente novamente!";
       });
     });
   }
@@ -61,7 +61,7 @@ class _LoginState extends State<Login> {
     FirebaseAuth auth = FirebaseAuth.instance;
     User usuarioLogado = await auth.currentUser;
     if (usuarioLogado != null) {
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Home()));
+      Navigator.pushReplacementNamed(context, "/home");
     }
   }
 
