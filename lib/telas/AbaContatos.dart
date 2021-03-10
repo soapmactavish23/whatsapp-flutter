@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:whatsapp/model/Contato.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:whatsapp/model/Usuario.dart';
 
 class AbaContatos extends StatefulWidget {
   @override
@@ -7,37 +10,92 @@ class AbaContatos extends StatefulWidget {
 }
 
 class _AbaContatosState extends State<AbaContatos> {
-  List<Contato> listaContato = [
-    Contato("Ana Clara",
-        "https://firebasestorage.googleapis.com/v0/b/whatsapp-flutter-57a34.appspot.com/o/perfil%2Fperfil1.jpg?alt=media&token=bbefd076-ee5a-47f1-96ff-861fcf2a98af"),
-    Contato("Pedro Silva",
-        "https://firebasestorage.googleapis.com/v0/b/whatsapp-flutter-57a34.appspot.com/o/perfil%2Fperfil2.jpg?alt=media&token=3111ffe9-2594-474e-84f5-a8bebdb234ef"),
-    Contato("Marcela Almeida",
-        "https://firebasestorage.googleapis.com/v0/b/whatsapp-flutter-57a34.appspot.com/o/perfil%2Fperfil3.jpg?alt=media&token=b2566270-7ac8-4588-8768-e3c15025dc34"),
-    Contato("José Renato",
-        "https://firebasestorage.googleapis.com/v0/b/whatsapp-flutter-57a34.appspot.com/o/perfil%2Fperfil4.jpg?alt=media&token=12157353-1776-49a9-b9ff-13ca38f60efe"),
-    Contato("Jamilton Damasceno",
-        "https://firebasestorage.googleapis.com/v0/b/whatsapp-flutter-57a34.appspot.com/o/perfil%2Fperfil5.jpg?alt=media&token=22e59f60-3cdb-40a2-a300-14a1bc9dffd2")
-  ];
+  String _idUsuarioLogado;
+  String _emailUsuarioLogado;
+
+  _recuperarDadosUsuario() async {
+    FirebaseAuth auth = FirebaseAuth.instance;
+    User usuarioLogado = await auth.currentUser;
+    _idUsuarioLogado = usuarioLogado.uid;
+    _emailUsuarioLogado = usuarioLogado.email;
+  }
+
+  Future<List<Usuario>> _recuperarContatos() async {
+    FirebaseFirestore db = FirebaseFirestore.instance;
+
+    QuerySnapshot querySnapshot = await db.collection("usuarios").get();
+
+    List<Usuario> listaUsuarios = List();
+    for (DocumentSnapshot item in querySnapshot.docs) {
+      var dados = item.data();
+
+      if (dados["email"] == _emailUsuarioLogado) continue;
+
+      Usuario usuario = Usuario();
+      usuario.email = dados["email"];
+      usuario.nome = dados["nome"];
+      usuario.urlImagem = dados["urlImagem"];
+
+      listaUsuarios.add(usuario);
+    }
+
+    return listaUsuarios;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _recuperarDadosUsuario();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-        itemCount: listaContato.length,
-        itemBuilder: (context, indice) {
-          Contato contato = listaContato[indice];
-          return ListTile(
-            contentPadding: EdgeInsets.fromLTRB(16, 8, 16, 8),
-            leading: CircleAvatar(
-              maxRadius: 30,
-              backgroundColor: Colors.grey,
-              backgroundImage: NetworkImage(contato.caminhoFoto),
-            ),
-            title: Text(
-              contato.nome,
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-            ),
-          );
-        });
+    return FutureBuilder<List<Usuario>>(
+      future: _recuperarContatos(),
+      builder: (context, snapshot) {
+        switch (snapshot.connectionState) {
+          case ConnectionState.none:
+            break;
+          case ConnectionState.waiting:
+            return Center(
+              child: Column(
+                children: <Widget>[
+                  Text("Carregando contatos"),
+                  CircularProgressIndicator()
+                ],
+              ),
+            );
+            break;
+          case ConnectionState.active:
+            break;
+          case ConnectionState.done:
+            return ListView.builder(
+                itemCount: snapshot.data.length,
+                itemBuilder: (context, indice) {
+                  List<Usuario> listaItens = snapshot.data;
+                  Usuario usuario = listaItens[indice];
+                  return ListTile(
+                    onTap: () {
+                      Navigator.pushNamed(context, "/mensagens", arguments: usuario);
+                    },
+                    contentPadding: EdgeInsets.fromLTRB(16, 8, 16, 8),
+                    leading: CircleAvatar(
+                      maxRadius: 30,
+                      backgroundColor: Colors.grey,
+                      backgroundImage: usuario.urlImagem != null
+                          ? NetworkImage(usuario.urlImagem)
+                          : null,
+                    ),
+                    title: Text(
+                      usuario.nome,
+                      style:
+                          TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                    ),
+                  );
+                });
+            break;
+        }
+      },
+    );
   }
 }

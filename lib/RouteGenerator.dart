@@ -4,10 +4,13 @@ import 'Cadastro.dart';
 import 'Configuracoes.dart';
 import 'Home.dart';
 import 'Login.dart';
+import 'Mensagens.dart';
 
 class RouteGenerator{
 
   static Route<dynamic> generateRoute(RouteSettings settings){
+
+    final args = settings.arguments;
 
     switch(settings.name){
 
@@ -34,6 +37,11 @@ class RouteGenerator{
       case "/configuracoes":
         return MaterialPageRoute(
             builder: (context) => Configuracoes()
+        );
+        break;
+      case "/mensagens":
+        return MaterialPageRoute(
+            builder: (context) => Mensagens(args)
         );
         break;
       default:
