@@ -59,12 +59,7 @@ class _AbaContatosState extends State<AbaContatos> {
             break;
           case ConnectionState.waiting:
             return Center(
-              child: Column(
-                children: <Widget>[
-                  Text("Carregando contatos"),
-                  CircularProgressIndicator()
-                ],
-              ),
+              child: CircularProgressIndicator()
             );
             break;
           case ConnectionState.active:
