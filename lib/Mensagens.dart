@@ -29,6 +29,7 @@ class _MensagensState extends State<Mensagens> {
       mensagem.tipo = "texto";
 
       _salvarMensagem(_idUsuarioLogado, _idUsuarioDestinatario, mensagem);
+      _salvarMensagem(_idUsuarioDestinatario, _idUsuarioLogado, mensagem);
     }
   }
 
@@ -48,9 +49,10 @@ class _MensagensState extends State<Mensagens> {
   _recuperarDadosUsuario() async {
     FirebaseAuth auth = FirebaseAuth.instance;
     User usuarioLogado = await auth.currentUser;
-    _idUsuarioLogado = usuarioLogado.uid;
-
-    _idUsuarioDestinatario = widget.contato.idUsuario;
+    setState(() {
+      _idUsuarioLogado = usuarioLogado.uid;
+      _idUsuarioDestinatario = widget.contato.idUsuario;
+    });
   }
 
   @override
@@ -156,13 +158,12 @@ class _MensagensState extends State<Mensagens> {
             break;
           case ConnectionState.active:
           case ConnectionState.done:
-
-            QuerySnapshot querySnapshot = snapshot.data;
             if (snapshot.hasError) {
               return Expanded(
                 child: Text("Erro ao carregar os dados!"),
               );
             } else {
+              QuerySnapshot querySnapshot = snapshot.data;
               return Expanded(
                 child: ListView.builder(
                     itemCount: querySnapshot.docs.length,
@@ -206,67 +207,6 @@ class _MensagensState extends State<Mensagens> {
             }
             break;
         }
-
-        /*switch(snapshot.connectionState){
-          case ConnectionState.none:
-            break;
-          case ConnectionState.waiting:
-            return Center(
-              child: Column(
-                children: <Widget>[
-                  Text("Carregando mensagens"),
-                  CircularProgressIndicator()
-                ],
-              ),
-            );
-            break;
-          case ConnectionState.active:
-            break;
-          case ConnectionState.done:
-
-            QuerySnapshot querySnapshot = snapshot.data;
-
-            if(snapshot.hasError){
-              return Expanded(child: Text("Erro ao carregar os dados!"));
-            }else{
-              return Expanded(child: ListView.builder(
-                itemCount: querySnapshot.docs.length,
-                  itemBuilder: (context, indice){
-                    List<DocumentSnapshot> mensagens = querySnapshot.docs.toList();
-                    DocumentSnapshot item = mensagens[indice];
-
-                    double larguraContainer = MediaQuery.of(context).size.width * 0.8;
-
-                    Alignment alinhamento = Alignment.centerRight;
-                    Color cor = Color(0xffd2ffa5);
-                    if(_idUsuarioLogado != item["idUsuario"]){
-                      alinhamento = Alignment.centerLeft;
-                      cor = Colors.white;
-                    }
-
-                    return Align(
-                      alignment: alinhamento,
-                      child: Padding(
-                        padding: EdgeInsets.all(6),
-                        child: Container(
-                          width: larguraContainer,
-                          padding: EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: cor,
-                            borderRadius: BorderRadius.all(Radius.circular(8)),
-                          ),
-                          child: Text(item["mensagem"], style: TextStyle(fontSize: 18)),
-                        ),
-                      ),
-                    );
-
-                  },
-                )
-              );
-            }
-
-            break;
-        }*/
       },
     );
 
