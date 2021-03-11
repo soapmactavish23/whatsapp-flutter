@@ -5,6 +5,7 @@ class Mensagem {
   String _mensagem;
   String _urlImagem;
   String _tipo;
+  String _dtUpdate = DateTime.now().microsecondsSinceEpoch.toString();
 
   Mensagem();
 
@@ -12,12 +13,19 @@ class Mensagem {
     Map<String, dynamic> map = {
       "idUsuario": this.idUsuario,
       "mensagem": this.mensagem,
-      "_urlImagem": this.urlImagem,
-      "tipo": this.tipo
+      "urlImagem": this.urlImagem,
+      "tipo": this.tipo,
+      "dtUpdate": this.dtUpdate
     };
 
     return map;
 
+  }
+
+  String get dtUpdate => _dtUpdate;
+
+  set dtUpdate(String value) {
+    _dtUpdate = value;
   }
 
   String get tipo => _tipo;
