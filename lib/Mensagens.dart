@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'model/Conversa.dart';
@@ -24,6 +26,27 @@ class _MensagensState extends State<Mensagens> {
   FirebaseFirestore db = FirebaseFirestore.instance;
   ImagePicker _picker = ImagePicker();
   bool _subindoImagem = false;
+
+  final _controller = StreamController<QuerySnapshot>.broadcast();
+  ScrollController _scrollController = ScrollController();
+
+  Stream<QuerySnapshot> _adicionarListenerMensagens() {
+    final stream = db
+        .collection("mensagens")
+        .doc(_idUsuarioLogado)
+        .collection(_idUsuarioDestinatario)
+        .orderBy("dtUpdate", descending: false)
+        .snapshots();
+
+    stream.listen((dados) {
+      setState(() {
+        _controller.add(dados);
+      });
+      Timer(Duration(seconds: 1), (){
+        _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
+      });
+    });
+  }
 
   _enviarMensagem() {
     String textoMensagem = __controllerMensagem.text;
@@ -134,6 +157,7 @@ class _MensagensState extends State<Mensagens> {
       _idUsuarioLogado = usuarioLogado.uid;
       _idUsuarioDestinatario = widget.contato.idUsuario;
     });
+    _adicionarListenerMensagens();
   }
 
   @override
@@ -182,12 +206,7 @@ class _MensagensState extends State<Mensagens> {
     );
 
     var stream = StreamBuilder(
-      stream: db
-          .collection("mensagens")
-          .doc(_idUsuarioLogado)
-          .collection(_idUsuarioDestinatario)
-          .orderBy("dtUpdate", descending: false)
-          .snapshots(),
+      stream: _controller.stream,
       builder: (context, snapshot) {
         switch (snapshot.connectionState) {
           case ConnectionState.none:
@@ -211,6 +230,7 @@ class _MensagensState extends State<Mensagens> {
               QuerySnapshot querySnapshot = snapshot.data;
               return Expanded(
                 child: ListView.builder(
+                    controller: _scrollController,
                     itemCount: querySnapshot.docs.length,
                     itemBuilder: (context, indice) {
                       //recupera mensagem
